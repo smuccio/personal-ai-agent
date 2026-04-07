@@ -1,0 +1,23 @@
+{
+  "name": "@personal-ai-agent/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "agent": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node --enable-source-maps ./dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@personal-ai-agent/core": "*",
+    "commander": "^13.1.0",
+    "ora": "^8.2.0",
+    "chalk": "^5.4.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0"
+  }
+}
