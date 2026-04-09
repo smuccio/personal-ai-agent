@@ -7,13 +7,9 @@ export interface BrowserHandle {
 }
 
 export interface CreateBrowserOptions {
-  /** Enable stealth mode (residential proxy, fingerprint removal) */
   stealth?: boolean;
-  /** Session timeout in seconds (default: 300, max: 259200 = 72hrs) */
   timeout?: number;
-  /** Kernel profile ID for persistent cookies/auth */
   profileId?: string;
-  /** Viewport preset or custom dimensions */
   viewport?: { width: number; height: number };
 }
 
@@ -21,9 +17,6 @@ const kernel = new Kernel({
   apiKey: process.env.KERNEL_API_KEY,
 });
 
-/**
- * Create a new cloud browser session via Kernel.
- */
 export async function createBrowser(
   options: CreateBrowserOptions = {}
 ): Promise<BrowserHandle> {
@@ -31,35 +24,36 @@ export async function createBrowser(
     stealth: options.stealth ?? true,
     timeout_seconds: options.timeout ?? 300,
     ...(options.profileId && { profile: { id: options.profileId } }),
-    ...(options.viewport && { viewport: options.viewport }),
+    ...(options.viewport && {
+      viewport: {
+        width: options.viewport.width,
+        height: options.viewport.height,
+      },
+    }),
   });
 
   return {
     sessionId: browser.session_id,
     cdpWsUrl: browser.cdp_ws_url,
-    liveViewUrl: browser.browser_live_view_url,
+    liveViewUrl: browser.browser_live_view_url || '',
   };
 }
 
-/**
- * Destroy a browser session.
- */
 export async function destroyBrowser(sessionId: string): Promise<void> {
-  await kernel.browsers.delete(sessionId);
+  await kernel.browsers.deleteByID(sessionId);
 }
 
 /**
- * Capture a screenshot of the current browser state.
- * Returns base64 PNG string.
+ * Capture a screenshot. Returns base64 PNG string.
  */
 export async function getScreenshot(sessionId: string): Promise<string> {
-  const result = await kernel.browsers.computer.captureScreenshot(sessionId);
-  return result.screenshot_base64;
+  const response = await kernel.browsers.computer.captureScreenshot(sessionId);
+  // Response is a raw Response object - read as arrayBuffer then convert to base64
+  const arrayBuffer = await response.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  return buffer.toString('base64');
 }
 
-/**
- * Click at specific coordinates (vision-based interaction).
- */
 export async function clickAt(
   sessionId: string,
   x: number,
@@ -68,9 +62,6 @@ export async function clickAt(
   await kernel.browsers.computer.clickMouse(sessionId, { x, y });
 }
 
-/**
- * Type text at the current cursor position.
- */
 export async function typeText(
   sessionId: string,
   text: string
@@ -78,9 +69,6 @@ export async function typeText(
   await kernel.browsers.computer.typeText(sessionId, { text });
 }
 
-/**
- * Press keyboard keys.
- */
 export async function pressKey(
   sessionId: string,
   keys: string[]
@@ -88,9 +76,6 @@ export async function pressKey(
   await kernel.browsers.computer.pressKey(sessionId, { keys });
 }
 
-/**
- * Scroll at specific coordinates.
- */
 export async function scrollAt(
   sessionId: string,
   x: number,
@@ -104,17 +89,10 @@ export async function scrollAt(
   });
 }
 
-/**
- * Move mouse to specific coordinates.
- */
 export async function moveMouse(
   sessionId: string,
   x: number,
   y: number
 ): Promise<void> {
-  await kernel.browsers.computer.moveMouse(sessionId, {
-    x,
-    y,
-    smooth: true,
-  });
+  await kernel.browsers.computer.moveMouse(sessionId, { x, y });
 }

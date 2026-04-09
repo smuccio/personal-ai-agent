@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import 'dotenv/config';
 import { Command } from 'commander';
 import { runCommand } from './commands/run.js';
 
@@ -13,19 +14,13 @@ program
 program
   .command('run')
   .description('Run a browser automation task')
-  .argument('<task>', 'The task to perform (e.g., "go to linkedin and search for AI engineers")')
-  .option('-m, --model <model>', 'LLM model to use (e.g., anthropic/claude-sonnet-4-20250514)')
-  .option('-p, --provider <provider>', 'LLM provider (openrouter or bedrock)', 'openrouter')
-  .option('-b, --budget <budget>', 'Maximum budget in USD', '0.50')
-  .option('-s, --steps <steps>', 'Maximum steps', '30')
+  .argument('<task>', 'The task to perform (e.g., "go to google.com and search for AI news")')
+  .option('-m, --model <model>', 'LLM model ID (e.g., anthropic.claude-3-5-haiku-20241022-v1:0)')
+  .option('-p, --provider <provider>', 'LLM provider: bedrock or openrouter')
+  .option('-b, --budget <budget>', 'Maximum budget in USD')
+  .option('-s, --steps <steps>', 'Maximum steps')
   .option('--profile <profile>', 'Kernel browser profile ID for persistent sessions')
   .option('--no-stealth', 'Disable stealth mode')
   .action(runCommand);
-
-// TODO: Add session management commands
-// program.command('session').description('Manage browser sessions')...
-
-// TODO: Add config commands
-// program.command('config').description('Manage agent configuration')...
 
 program.parse();

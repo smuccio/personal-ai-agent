@@ -1,16 +1,40 @@
-// Tool barrel export - all tools registered here
-// Each tool uses Vercel AI SDK tool() with Zod schemas
-// Hybrid approach: Playwright-based (fast) + Vision-based (flexible)
+import type { BrowserSession } from '../browser/browser-session.js';
+import { createNavigationTools } from './navigation.js';
+import { createInteractionTools } from './interaction.js';
+import { createExtractionTools } from './extraction.js';
+import { createVisionTools } from './vision.js';
+import { createKeyboardTools } from './keyboard.js';
+import { createScrollTools } from './scroll.js';
+import { createFormTools } from './form.js';
+import { createMetaTools } from './meta.js';
 
-// TODO: Import and re-export all tools once implemented
-// export { navigateTool, goBackTool, goForwardTool, getCurrentUrlTool } from './navigation.js';
-// export { clickTool, typeTool, selectTool, hoverTool } from './interaction.js';
-// export { extractTextTool, extractTableTool, extractLinksTool, getPageTitleTool } from './extraction.js';
-// export { screenshotTool, visionClickTool, visionTypeTool, visionScrollTool } from './vision.js';
-// export { pressKeyTool } from './keyboard.js';
-// export { scrollDownTool, scrollUpTool } from './scroll.js';
-// export { fillFormTool, submitFormTool } from './form.js';
-// export { doneTool, askUserTool } from './meta.js';
+/**
+ * Creates all agent tools bound to a browser session.
+ * Tools are split into categories:
+ * - Playwright-based (fast, CSS selectors): navigation, interaction, extraction, keyboard, scroll, form
+ * - Vision-based (screenshots + coordinates): vision
+ * - Meta (control flow): done, askUser
+ */
+export function createAllTools(session: BrowserSession) {
+  return {
+    ...createNavigationTools(session),
+    ...createInteractionTools(session),
+    ...createExtractionTools(session),
+    ...createVisionTools(session),
+    ...createKeyboardTools(session),
+    ...createScrollTools(session),
+    ...createFormTools(session),
+    ...createMetaTools(),
+  };
+}
 
-// Placeholder until tools are implemented
-export const allTools = {};
+export {
+  createNavigationTools,
+  createInteractionTools,
+  createExtractionTools,
+  createVisionTools,
+  createKeyboardTools,
+  createScrollTools,
+  createFormTools,
+  createMetaTools,
+};
