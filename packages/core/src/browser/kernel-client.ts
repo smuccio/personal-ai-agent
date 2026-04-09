@@ -13,14 +13,21 @@ export interface CreateBrowserOptions {
   viewport?: { width: number; height: number };
 }
 
-const kernel = new Kernel({
-  apiKey: process.env.KERNEL_API_KEY,
-});
+let _kernel: Kernel | null = null;
+
+function getKernel(): Kernel {
+  if (!_kernel) {
+    _kernel = new Kernel({
+      apiKey: process.env.KERNEL_API_KEY,
+    });
+  }
+  return _kernel;
+}
 
 export async function createBrowser(
   options: CreateBrowserOptions = {}
 ): Promise<BrowserHandle> {
-  const browser = await kernel.browsers.create({
+  const browser = await getKernel().browsers.create({
     stealth: options.stealth ?? true,
     timeout_seconds: options.timeout ?? 300,
     ...(options.profileId && { profile: { id: options.profileId } }),
@@ -40,14 +47,14 @@ export async function createBrowser(
 }
 
 export async function destroyBrowser(sessionId: string): Promise<void> {
-  await kernel.browsers.deleteByID(sessionId);
+  await getKernel().browsers.deleteByID(sessionId);
 }
 
 /**
  * Capture a screenshot. Returns base64 PNG string.
  */
 export async function getScreenshot(sessionId: string): Promise<string> {
-  const response = await kernel.browsers.computer.captureScreenshot(sessionId);
+  const response = await getKernel().browsers.computer.captureScreenshot(sessionId);
   // Response is a raw Response object - read as arrayBuffer then convert to base64
   const arrayBuffer = await response.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
@@ -59,21 +66,21 @@ export async function clickAt(
   x: number,
   y: number
 ): Promise<void> {
-  await kernel.browsers.computer.clickMouse(sessionId, { x, y });
+  await getKernel().browsers.computer.clickMouse(sessionId, { x, y });
 }
 
 export async function typeText(
   sessionId: string,
   text: string
 ): Promise<void> {
-  await kernel.browsers.computer.typeText(sessionId, { text });
+  await getKernel().browsers.computer.typeText(sessionId, { text });
 }
 
 export async function pressKey(
   sessionId: string,
   keys: string[]
 ): Promise<void> {
-  await kernel.browsers.computer.pressKey(sessionId, { keys });
+  await getKernel().browsers.computer.pressKey(sessionId, { keys });
 }
 
 export async function scrollAt(
@@ -82,7 +89,7 @@ export async function scrollAt(
   y: number,
   deltaY: number
 ): Promise<void> {
-  await kernel.browsers.computer.scroll(sessionId, {
+  await getKernel().browsers.computer.scroll(sessionId, {
     x,
     y,
     delta_y: deltaY,
@@ -94,5 +101,5 @@ export async function moveMouse(
   x: number,
   y: number
 ): Promise<void> {
-  await kernel.browsers.computer.moveMouse(sessionId, { x, y });
+  await getKernel().browsers.computer.moveMouse(sessionId, { x, y });
 }

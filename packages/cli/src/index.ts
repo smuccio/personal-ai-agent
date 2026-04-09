@@ -1,6 +1,14 @@
 #!/usr/bin/env node
 
-import 'dotenv/config';
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+// Load .env from project root (handles npm workspace CWD issues)
+config({ path: resolve(process.cwd(), '.env') });
+// Also try two levels up in case CWD is the cli package
+if (!process.env.KERNEL_API_KEY) {
+  config({ path: resolve(process.cwd(), '../../.env') });
+}
 import { Command } from 'commander';
 import { runCommand } from './commands/run.js';
 
