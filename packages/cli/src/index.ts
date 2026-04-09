@@ -1,11 +1,20 @@
 #!/usr/bin/env node
 
 import { config } from 'dotenv';
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-// Load .env from project root (handles npm workspace CWD issues)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load .env from project root - try multiple strategies for npm workspace CWD issues
+// Strategy 1: CWD (works when run from project root)
 config({ path: resolve(process.cwd(), '.env') });
-// Also try two levels up in case CWD is the cli package
+// Strategy 2: relative to this file (packages/cli/dist/index.js → 3 levels up)
+if (!process.env.KERNEL_API_KEY) {
+  config({ path: resolve(__dirname, '../../../.env') });
+}
+// Strategy 3: CWD two levels up (when npm sets CWD to packages/cli/)
 if (!process.env.KERNEL_API_KEY) {
   config({ path: resolve(process.cwd(), '../../.env') });
 }
